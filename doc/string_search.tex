@@ -5,7 +5,7 @@
 \begin{document}
 
 \title{String Search}
-\author{Ryan Layer}
+\author{Audrey Weaver}
 \maketitle
 
 \section{Introduction}
@@ -17,10 +17,12 @@ G—transforms the comparison of two genomes into a computational string search
 challenge. This problem involves two input strings: a typically longer string,
 the text $T$, and a usually shorter string, the pattern $P$. The
 objective is to locate every instance of $P$ within $T$. Here we analyze the
-the efficiency and memory consumption of a basic string search algorithm that
-aligns $P$ with all possible positions in $T$.  The algorithm's runtime
-correlated with $T$'s length and it's additional memory requirement were
-minimal.
+the efficiency and memory consumption of a basic string search algorithm, 
+naive search, and a more advanced string search algorithm, Boyer Moore, that
+aligns $P$ with all possible positions in $T$.  The naive search algorithm's
+runtimes correlated with $T$'s length and additional memory requirement were
+minimal. The Boyer Moore algorithm required a more memory consistently across
+experimentation. 
 
 \section{Results}
 
@@ -33,7 +35,6 @@ possible alignments increases linearly. The algorithm's memory usage remained
 constant because the algorithm only stores the positions of the pattern $P$ in
 the text $T$.
 
-%%%%% Add your experiment here %%%%
 
 \begin{figure}[ht] \centering
     \includegraphics[width=0.6\textwidth]{naive_search}
@@ -43,7 +44,22 @@ the text $T$.
     \label{timeandmem}
 \end{figure}
 
-%%%% Add your figure here %%%%
+Niether the runtime nor the memory usage of the Boyer Moore algorithm varied 
+significantly during the experiment. This is to be expected as the Boyer Moore 
+algorithm uses heuristics, the bad character table, and the good suffix table 
+to determine skip length and avoid comparing every character. Because of its
+speed, the Boyer Moore model is more efficient overall especially on larger 
+sequences or situations where $P$ is rare in $T$. The memory usage is 
+consistently higher in the Boyer Moore model as it requires storage of the 
+good suffix table and the bad character table. 
+
+\begin{figure}[ht] \centering
+    \includegraphics[width=0.6\textwidth]{results10000}
+    \caption{The empirical runtime and memory usage of the naive string search
+    algorithm and the Boyer Moore search algorithm considering a pattern size 
+    of 80 and a database size ranging from 100 to 10,000 characters.}
+    \label{timeandmem}
+\end{figure}
 
 \section{Methods}
 
@@ -58,29 +74,42 @@ alignment breaks and then $P$ shifts down one position in $T$, and the process
 repeats. This process continues until $P$ has been compared to all possible
 alignments in $T$, then returns the recorded positions.
 
-\subsection{Empirical comparison}
+\subsection{Boyer Moore string search}
+The Boyer Moore search algorithm improves upon the naive search because it 
+skips sections of characters where a match is impossible. Therefore, it is 
+significantly fasterwith a large or very unique text. Boyer Moore computes 
+and stores heuristics: the bad character rule which shifts $P$ based on the 
+last occurence of the mismatched character in $P$, and the good suffix rule 
+which shifts $P$ when a suffix of $P$ matches $T$. The algorithm compares $P$ 
+to $T$ from right to left, using the stores heuristics to determine the shift 
+length before continuing to search. This process continues until P has been 
+compared to all possible allignments in T, then it returns the recorded 
+positions where $P$ occurs.
 
-We evaluated the performance of the naive string search algorithm considering a
-pattern size of 100 and text sizes that ranged from 100 to 10,000 characters
-with a step size of 100.  The performance metrics include runtime and memory
-usage. For each text size, we ran a single search where we generated a random
-string for $T$ from the alphabet ${A, C, T, G}$ and extracted a random
-substring $P$ from $T$. We then recorded the runtime and memory usage of the
-algorithm consiuder that $P$ and $T$. After the round was complete for a given
-text size, we calculated the average runtime and memory usage for the search.
+\subsection{Empirical comparison}
+We evaluated the performance of the naive string search and Boyer Moore 
+algorithms considering a pattern size of 80 and text sizes that ranged 
+from 100 to 10,000 characters with a step size of 100.  The performance 
+metrics include runtime and memory usage. For each text size, we ran a 
+single search where we generated a random string for $T$ from the alphabet 
+${A, C, T, G}$ and extracted a random substring $P$ from $T$. We then 
+recorded the runtime and memory usage of the algorithm consiuder that $P$ 
+and $T$. After ten rounds were complete for a given text size, we calculated 
+the average runtime and memory usage for the search.
 
 \subsection{Reproducibility}
 To replicate these experiments, clone the repository and then run the
 following commands from the root directory of the repository.
+
 \begin{verbatim}
 $ git clone https://github.com/ryanlayerlab/string_search.git
 $ cd string_search
 $ python src/string_search.py \
     --text_range 100 10000 100 \
-    --pattern_size 100 \
-    --rounds 1 \
-    --out_file doc/naive_search.png
+    --pattern_size 80 \
+    --out_file doc/results10000.png
+
+    python ./src/string_search.py --text_range 1000 10000 100 --pattern_size 80 --out_file results10000.png
 \end{verbatim}
-%%%% Add your command here%%%%
 
 \end{document}

@@ -42,14 +42,49 @@ def get_good_suffix_table(P):
 
 def get_bad_char_table(P):
     bad_char_table = {}
-    #####################################################################
-    ## ADD CODE HERE
-    #####################################################################
+   
+    m = len(P)
+
+    #make table with  -1 for all values 
+    for i in range(256):
+        bad_char_table[chr(i)] = -1
+    
+    #populate with the furtheest right occurence of each character in P
+    for i in range(m):
+        bad_char_table[P[i]] = i
+
     return bad_char_table
+
 
 def boyer_moore_search(T, P):
     occurrences = []
-    #####################################################################
-    ## ADD CODE HERE
-    #####################################################################
+    n = len(T)
+    m = len(P)
+
+    #process tables
+    bct = get_bad_char_table(P)
+    gst = get_good_suffix_table(P)
+
+    #store shift
+    s = 0
+
+    while s <= n-m:
+        j = m-1
+
+        #compare right to left
+        while j>= 0 and P[j] == T[s+j]:
+            j-=1 #shift left
+
+        if j <0:
+            #use good suffix rule when match found
+            occurrences.append(s)
+            s+=gst[0]
+
+        else:
+            bcshift = j - bct.get(T[s+j], -1)
+            gsshift = gst[j] if j<m else 1
+            
+            #move by max shift
+            s += max(bcshift, gsshift) 
+
     return occurrences
